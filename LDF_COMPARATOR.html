@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LDF File Comparator - Precision Editorial</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                "colors": {
+                    "surface-container-low": "#f3f4f5",
+                    "tertiary": "#755700",
+                    "on-primary-fixed-variant": "#004493",
+                    "on-background": "#191c1d",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-tertiary-fixed-variant": "#5b4300",
+                    "secondary-container": "#d8e1ea",
+                    "surface-container-high": "#e7e8e9",
+                    "tertiary-container": "#946f00",
+                    "error-container": "#ffdad6",
+                    "background": "#f8f9fa",
+                    "secondary-fixed-dim": "#bfc8d0",
+                    "surface-container": "#edeeef",
+                    "inverse-on-surface": "#f0f1f2",
+                    "secondary": "#575f67",
+                    "primary-fixed": "#d8e2ff",
+                    "secondary-fixed": "#dbe4ed",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed": "#261a00",
+                    "on-secondary-fixed-variant": "#3f484f",
+                    "outline-variant": "#c1c6d7",
+                    "on-secondary-container": "#5b646b",
+                    "surface-variant": "#e1e3e4",
+                    "on-error": "#ffffff",
+                    "on-tertiary-container": "#fffbff",
+                    "on-surface-variant": "#414754",
+                    "on-primary-container": "#fefcff",
+                    "surface-dim": "#d9dadb",
+                    "on-surface": "#191c1d",
+                    "on-secondary-fixed": "#141d23",
+                    "tertiary-fixed-dim": "#fabd00",
+                    "primary-fixed-dim": "#adc7ff",
+                    "on-primary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "primary-container": "#0070ea",
+                    "surface-tint": "#005bc0",
+                    "surface-bright": "#f8f9fa",
+                    "outline": "#717786",
+                    "on-primary-fixed": "#001a41",
+                    "inverse-primary": "#adc7ff",
+                    "surface": "#f8f9fa",
+                    "inverse-surface": "#2e3132",
+                    "on-error-container": "#93000a",
+                    "primary": "#0059bb",
+                    "tertiary-fixed": "#ffdf9e"
+                },
+                "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+                },
+                "fontFamily": {
+                    "headline": ["Inter", "sans-serif"],
+                    "body": ["Inter", "sans-serif"],
+                    "label": ["Space Grotesk", "sans-serif"],
+                    "mono": ["Fira Code", "monospace"]
+                }
+            },
+        }
+    }
+</script>
+<style>
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body { font-family: 'Inter', sans-serif; }
+    .drop-active { border-color: #0059bb !important; background-color: #d8e2ff22 !important; }
+</style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+
+<!-- TopNavBar -->
+<header class="bg-slate-50 flex justify-between items-center w-full px-8 py-4 max-w-[1920px] mx-auto z-50">
+    <div class="flex items-center gap-8">
+        <h1 class="text-xl font-bold tracking-tight text-slate-900 font-headline">LDF File Comparator</h1>
+    </div>
+    <div class="flex items-center gap-1 rounded-lg border border-slate-200 overflow-hidden text-[11px] font-bold font-label">
+        <button id="btn-lang-tr" onclick="setLang('tr')" class="px-3 py-1.5 bg-primary text-white transition-colors">TR</button>
+        <button id="btn-lang-en" onclick="setLang('en')" class="px-3 py-1.5 text-slate-500 hover:bg-slate-100 transition-colors">EN</button>
+    </div>
+</header>
+
+<!-- Main Content Canvas -->
+<main class="flex-grow p-8 space-y-8 max-w-[1920px] mx-auto w-full">
+    <div class="grid grid-cols-11 gap-6 items-start">
+
+        <!-- Left Column: Old Version -->
+        <section class="col-span-5 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-2xl font-bold font-headline tracking-tight" data-i18n="old_version">Eski Versiyon</h3>
+                <span id="old-filename" class="text-xs font-label bg-surface-container-high px-2 py-1 rounded text-on-surface-variant">—</span>
+            </div>
+            <div id="drop-old"
+                class="bg-surface-container-low rounded-xl p-8 flex flex-col items-center justify-center border-2 border-dashed border-outline-variant/30 hover:border-primary/50 transition-colors group cursor-pointer"
+                ondragover="handleDragOver(event, 'drop-old')"
+                ondragleave="handleDragLeave('drop-old')"
+                ondrop="handleDrop(event, 'old')">
+                <span class="material-symbols-outlined text-4xl text-primary mb-4 opacity-60 group-hover:opacity-100 transition-opacity">cloud_upload</span>
+                <p class="text-on-surface-variant font-label text-sm mb-4" data-i18n="drag_file">LDF dosyasını buraya sürükleyin</p>
+                <button onclick="document.getElementById('input-old').click()"
+                    class="bg-surface-container-highest px-6 py-2 rounded-lg font-label text-xs font-bold hover:bg-surface-container-high transition-all" data-i18n="select_file">
+                    Dosya Seç
+                </button>
+                <input id="input-old" type="file" accept=".ldf,.LDF" class="hidden" onchange="handleFileInput(event, 'old')"/>
+            </div>
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col h-[300px]">
+                <div class="bg-surface-dim px-4 py-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">description</span>
+                    <span class="text-[10px] font-label font-bold text-on-surface-variant" data-i18n="old_file_preview">Eski Dosya</span>
+                </div>
+                <div class="flex-grow overflow-auto p-4 font-mono text-xs leading-relaxed text-on-surface bg-surface-container-lowest">
+                    <pre id="preview-old" class="text-on-surface-variant italic">Dosya yüklenmedi...</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Center Column: Compare Action -->
+        <section class="col-span-1 flex flex-col items-center justify-center h-full pt-20">
+            <button onclick="compareFiles()"
+                class="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary-container text-white shadow-xl hover:scale-110 transition-transform flex items-center justify-center group active:scale-95">
+                <span class="material-symbols-outlined text-3xl">compare_arrows</span>
+            </button>
+            <span class="mt-4 text-[10px] font-bold font-label uppercase text-primary tracking-widest" data-i18n="compare">Karşılaştır</span>
+        </section>
+
+        <!-- Right Column: New Version -->
+        <section class="col-span-5 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-2xl font-bold font-headline tracking-tight" data-i18n="new_version">Yeni Versiyon</h3>
+                <span id="new-filename" class="text-xs font-label bg-primary-fixed px-2 py-1 rounded text-on-primary-fixed-variant">—</span>
+            </div>
+            <div id="drop-new"
+                class="bg-surface-container-low rounded-xl p-8 flex flex-col items-center justify-center border-2 border-dashed border-outline-variant/30 hover:border-primary/50 transition-colors group cursor-pointer"
+                ondragover="handleDragOver(event, 'drop-new')"
+                ondragleave="handleDragLeave('drop-new')"
+                ondrop="handleDrop(event, 'new')">
+                <span class="material-symbols-outlined text-4xl text-primary mb-4 opacity-60 group-hover:opacity-100 transition-opacity">cloud_upload</span>
+                <p class="text-on-surface-variant font-label text-sm mb-4" data-i18n="drag_file">LDF dosyasını buraya sürükleyin</p>
+                <button onclick="document.getElementById('input-new').click()"
+                    class="bg-surface-container-highest px-6 py-2 rounded-lg font-label text-xs font-bold hover:bg-surface-container-high transition-all" data-i18n="select_file">
+                    Dosya Seç
+                </button>
+                <input id="input-new" type="file" accept=".ldf,.LDF" class="hidden" onchange="handleFileInput(event, 'new')"/>
+            </div>
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col h-[300px]">
+                <div class="bg-surface-dim px-4 py-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">description</span>
+                    <span class="text-[10px] font-label font-bold text-on-surface-variant" data-i18n="new_file_preview">Yeni Dosya</span>
+                </div>
+                <div class="flex-grow overflow-auto p-4 font-mono text-xs leading-relaxed text-on-surface bg-surface-container-lowest">
+                    <pre id="preview-new" class="text-on-surface-variant italic">Dosya yüklenmedi...</pre>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Comparison Results Section -->
+    <section id="results-section" class="space-y-6 hidden">
+        <div class="flex items-end justify-between">
+            <div>
+                <h2 class="text-3xl font-extrabold font-headline tracking-tight text-on-surface" data-i18n="results_title">Karşılaştırma Sonuçları</h2>
+                <p id="results-summary" class="text-on-surface-variant font-label text-sm mt-1"></p>
+            </div>
+            <div id="results-badges" class="flex gap-4"></div>
+        </div>
+
+        <!-- Signal Filter Bar -->
+        <div id="filter-bar" class="hidden bg-surface-container-low rounded-xl border border-outline-variant/20 overflow-hidden">
+            <div class="flex items-center gap-3 px-5 py-3 bg-surface-container border-b border-outline-variant/15">
+                <span class="material-symbols-outlined text-base text-on-surface-variant">filter_list</span>
+                <span class="text-[11px] font-bold font-label uppercase text-on-surface-variant tracking-widest" data-i18n="filter_title">Sinyal Filtrele</span>
+            </div>
+            <div id="filter-chips" class="flex flex-wrap gap-3 px-5 py-3"></div>
+        </div>
+
+        <!-- No diff banner -->
+        <div id="no-diff-banner" class="hidden bg-green-50 border border-green-200 rounded-xl px-8 py-10 flex flex-col items-center justify-center gap-3">
+            <span class="material-symbols-outlined text-5xl text-green-600">check_circle</span>
+            <p class="text-green-800 font-bold font-headline text-xl" data-i18n="no_diff_title">Fark Yok</p>
+            <p class="text-green-700 font-label text-sm" data-i18n="no_diff_desc">İki dosya birebir aynı içeriğe sahip.</p>
+        </div>
+
+        <!-- Diff table -->
+        <div id="diff-table" class="bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden border border-outline-variant/10 hidden">
+            <div class="flex bg-surface-container-high border-b border-outline-variant/20">
+                <div class="w-14 py-2 flex justify-center text-[10px] font-label font-bold text-outline uppercase tracking-tighter" data-i18n="col_line">Satır</div>
+                <div class="w-16 py-2 flex justify-center text-[10px] font-label font-bold text-outline uppercase tracking-tighter" data-i18n="col_type">Tür</div>
+                <div class="flex-grow py-2 px-4 text-[10px] font-label font-bold text-outline uppercase tracking-tighter" data-i18n="col_content">İçerik</div>
+            </div>
+            <div id="diff-rows" class="font-mono text-xs divide-y divide-surface-container"></div>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<footer class="bg-slate-50 flex justify-between items-center w-full px-8 py-4 border-t border-slate-200 mt-auto">
+    <div class="text-[10px] font-medium font-label text-slate-400 uppercase tracking-widest">LDF File Comparator</div>
+</footer>
+
+<script>
+    const state = { old: null, new: null };
+
+    // ── i18n ──────────────────────────────────────────────────────────────────
+    let currentLang = 'tr';
+
+    const TRANSLATIONS = {
+        tr: {
+            old_version: 'Eski Versiyon',        new_version: 'Yeni Versiyon',
+            drag_file: 'LDF dosyasını buraya sürükleyin',
+            select_file: 'Dosya Seç',
+            old_file_preview: 'Eski Dosya',       new_file_preview: 'Yeni Dosya',
+            file_not_loaded: 'Dosya yüklenmedi...',
+            compare: 'Karşılaştır',
+            results_title: 'Karşılaştırma Sonuçları',
+            no_diff_title: 'Fark Yok',
+            no_diff_desc: 'İki dosya birebir aynı içeriğe sahip.',
+            no_diff_summary: 'İki dosya arasında hiçbir fark bulunamadı.',
+            filter_title: 'Sinyal Filtrele',
+            col_line: 'Satır',    col_type: 'Tür',    col_content: 'İçerik',
+            badge_removed: 'Silinen',  badge_added: 'Eklenen',  badge_changed: 'Değişen',
+            tag_added: '+ Eklendi',    tag_removed: '- Silindi', tag_changed: '~ Değişti',
+            tag_delay: '~ Delay',      tag_equal: 'eşit',
+            hidden_lines: 'Değişmeyen satırlar gizlendi',
+            no_changes: 'değişiklik yok',
+            n_changes: 'değişiklik',   n_lines: 'satır',
+            changes_detected: n => `${n} değişiklik tespit edildi.`,
+            chip_delay: 'Delay Değişenler',        chip_sender: 'Göndericisi Değişenler',
+            chip_receiver: 'Alıcısı Değişenler',   chip_removed: 'Silinenler',
+            chip_added: 'Eklenenleri',
+            lbl_master: 'Master Node Değişti',     lbl_slaves: 'Slaves Değişti',
+            lbl_sender_ecu: 'Gönderici ECU Değişti', lbl_receiver_ecu: 'Alıcı ECU Değişti',
+            lbl_delay: 'Delay Değişti',
+            sender_lbl: 'Gönderici',               receivers_lbl: 'Alıcılar',
+        },
+        en: {
+            old_version: 'Old Version',            new_version: 'New Version',
+            drag_file: 'Drag LDF file here',
+            select_file: 'Select File',
+            old_file_preview: 'Old File',          new_file_preview: 'New File',
+            file_not_loaded: 'File not loaded...',
+            compare: 'Compare',
+            results_title: 'Comparison Results',
+            no_diff_title: 'No Differences',
+            no_diff_desc: 'Both files have identical content.',
+            no_diff_summary: 'No differences found between the two files.',
+            filter_title: 'Filter Signals',
+            col_line: 'Line',   col_type: 'Type',   col_content: 'Content',
+            badge_removed: 'Removed', badge_added: 'Added',  badge_changed: 'Changed',
+            tag_added: '+ Added',     tag_removed: '- Removed', tag_changed: '~ Changed',
+            tag_delay: '~ Delay',     tag_equal: 'equal',
+            hidden_lines: 'Unchanged lines hidden',
+            no_changes: 'no changes',
+            n_changes: 'changes',     n_lines: 'lines',
+            changes_detected: n => `${n} changes detected.`,
+            chip_delay: 'Delay Changes',           chip_sender: 'Sender Changed',
+            chip_receiver: 'Receiver Changed',     chip_removed: 'Removed',
+            chip_added: 'Added',
+            lbl_master: 'Master Node Changed',     lbl_slaves: 'Slaves Changed',
+            lbl_sender_ecu: 'Sender ECU Changed',  lbl_receiver_ecu: 'Receiver ECU Changed',
+            lbl_delay: 'Delay Changed',
+            sender_lbl: 'Sender',                  receivers_lbl: 'Receivers',
+        }
+    };
+
+    function t(key) { return TRANSLATIONS[currentLang][key] ?? TRANSLATIONS.tr[key] ?? key; }
+
+    function applyTranslations() {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            el.textContent = t(el.dataset.i18n);
+        });
+        if (!state.old) { const p = document.getElementById('preview-old'); p.textContent = t('file_not_loaded'); p.className = 'text-on-surface-variant italic'; }
+        if (!state.new) { const p = document.getElementById('preview-new'); p.textContent = t('file_not_loaded'); p.className = 'text-on-surface-variant italic'; }
+    }
+
+    function setLang(lang) {
+        currentLang = lang;
+        document.getElementById('btn-lang-tr').className = lang === 'tr'
+            ? 'px-3 py-1.5 bg-primary text-white transition-colors'
+            : 'px-3 py-1.5 text-slate-500 hover:bg-slate-100 transition-colors';
+        document.getElementById('btn-lang-en').className = lang === 'en'
+            ? 'px-3 py-1.5 bg-primary text-white transition-colors'
+            : 'px-3 py-1.5 text-slate-500 hover:bg-slate-100 transition-colors';
+        applyTranslations();
+        if (state.old && state.new) compareFiles();
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
+    function handleDragOver(e, zoneId) {
+        e.preventDefault();
+        document.getElementById(zoneId).classList.add('drop-active');
+    }
+    function handleDragLeave(zoneId) {
+        document.getElementById(zoneId).classList.remove('drop-active');
+    }
+    function handleDrop(e, side) {
+        e.preventDefault();
+        document.getElementById('drop-' + side).classList.remove('drop-active');
+        const file = e.dataTransfer.files[0];
+        if (file) loadFile(file, side);
+    }
+    function handleFileInput(e, side) {
+        const file = e.target.files[0];
+        if (file) loadFile(file, side);
+    }
+
+    function loadFile(file, side) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            state[side] = e.target.result;
+            document.getElementById('preview-' + side).textContent = e.target.result;
+            document.getElementById('preview-' + side).classList.remove('text-on-surface-variant', 'italic');
+            document.getElementById(side === 'old' ? 'old-filename' : 'new-filename').textContent = file.name;
+        };
+        reader.readAsText(file, 'utf-8');
+    }
+
+    function getEntryLine(d) {
+        return d.line !== undefined ? d.line : (d.newLine || d.oldLine || '');
+    }
+
+    // Only these are real top-level LDF sections — sub-blocks inside them
+    // (e.g. encoding type entries, frame bodies, schedule names) must NOT
+    // become separate accordion sections.
+    const LDF_TOP_SECTIONS = new Set([
+        'Nodes', 'Node_definitions', 'Node_attributes', 'Composite',
+        'Signals', 'Diagnostic_signals',
+        'Frames', 'Sporadic_frames', 'Event_triggered_frames', 'Diagnostic_frames',
+        'Node_composition', 'Schedule_tables',
+        'Signal_encoding_types', 'Signal_representation',
+        'Comments'
+    ]);
+
+    function assignBlocks(diff) {
+        let depth = 0, topBlock = null, subBlock = null;
+        return diff.map(d => {
+            const txt    = getEntryLine(d).trim();
+            const opens  = (txt.match(/\{/g) || []).length;
+            const closes = (txt.match(/\}/g) || []).length;
+            const prevDepth = depth;
+
+            // Top-level LDF section (depth 0 → 1)
+            if (depth === 0 && opens > 0) {
+                const m = txt.match(/^(\w+)/);
+                const name = m ? m[1] : null;
+                if (name && LDF_TOP_SECTIONS.has(name)) topBlock = name;
+            }
+
+            // Second-level named block (depth 1 → 2): frame name, schedule name, etc.
+            if (depth === 1 && opens > 0) {
+                const m = txt.match(/^(\w+)/);
+                subBlock = m ? m[1] : null;
+            }
+
+            const block    = topBlock  || 'Genel';
+            const captured = subBlock; // snapshot before depth update
+
+            depth = Math.max(0, depth + opens - closes);
+            if (depth === 0)                        { topBlock = null; subBlock = null; }
+            else if (prevDepth >= 2 && depth === 1) { subBlock = null; }
+
+            return { ...d, block, subBlock: captured };
+        });
+    }
+
+    function buildRow(d) {
+        const row = document.createElement('div');
+        if (d.type === 'added') {
+            row.className = 'flex items-stretch bg-primary-fixed/20';
+            row.dataset.filterType = 'added';
+            row.innerHTML = `
+                <div class="w-14 bg-primary-fixed/40 text-on-primary-fixed-variant flex items-center justify-center border-r border-outline-variant/10 text-[10px] font-mono">${String(d.lineNo).padStart(3,'0')}</div>
+                <div class="w-16 flex items-center justify-center border-r border-outline-variant/10">
+                    <span class="text-[10px] font-bold font-label text-primary bg-primary-fixed px-2 py-0.5 rounded">${t('tag_added')}</span>
+                </div>
+                <div class="flex-grow p-3 px-4 whitespace-pre font-medium text-primary">${escHtml(d.line)}</div>`;
+        } else if (d.type === 'removed') {
+            row.className = 'flex items-stretch bg-error-container/20';
+            row.dataset.filterType = 'removed';
+            row.innerHTML = `
+                <div class="w-14 bg-error-container/40 text-on-error-container flex items-center justify-center border-r border-outline-variant/10 text-[10px] font-mono">${String(d.lineNo).padStart(3,'0')}</div>
+                <div class="w-16 flex items-center justify-center border-r border-outline-variant/10">
+                    <span class="text-[10px] font-bold font-label text-error bg-error-container px-2 py-0.5 rounded">${t('tag_removed')}</span>
+                </div>
+                <div class="flex-grow p-3 px-4 whitespace-pre line-through opacity-70 text-on-error-container">${escHtml(d.line)}</div>`;
+        } else if (d.type === 'changed') {
+            if (d.reason === 'schedule_delay') {
+                row.className = 'flex items-stretch bg-teal-50';
+                row.dataset.filterType = 'delay';
+                const deltaStr  = (d.delta > 0 ? '+' : '') + d.delta + ' ms';
+                const deltaColor = d.delta > 0 ? 'text-orange-600' : 'text-teal-700';
+                row.innerHTML = `
+                    <div class="w-14 bg-teal-100 text-teal-700 flex items-center justify-center border-r border-teal-200 text-[10px] font-mono">${String(d.lineNo).padStart(3,'0')}</div>
+                    <div class="w-16 flex items-center justify-center border-r border-teal-200">
+                        <span class="text-[10px] font-bold font-label text-teal-700 bg-teal-100 px-1 py-0.5 rounded text-center leading-tight">${t('tag_delay')}</span>
+                    </div>
+                    <div class="flex-grow p-3 px-4 font-medium text-teal-900">
+                        <div class="whitespace-pre line-through opacity-60 text-red-500">${escHtml(d.oldLine)}</div>
+                        <div class="whitespace-pre text-green-700">${escHtml(d.newLine)}</div>
+                        <div class="text-[10px] mt-1">
+                            <span class="text-teal-600">${t('lbl_delay')}: </span>
+                            <span class="font-bold text-red-500">${d.oldDelay} ms</span>
+                            <span class="text-teal-500 mx-1">→</span>
+                            <span class="font-bold text-green-700">${d.newDelay} ms</span>
+                            <span class="font-bold ml-2 ${deltaColor}">(${deltaStr})</span>
+                        </div>
+                    </div>`;
+            } else {
+                row.className = 'flex items-stretch bg-amber-50';
+                if (d.reason === 'signal_ecu') {
+                    const tags = [];
+                    if (d.senderChanged)    tags.push('sender');
+                    if (d.receiversChanged) tags.push('receiver');
+                    row.dataset.filterType = tags.join(' ');
+                }
+                let ecuDetails = '';
+                if (d.reason === 'signal_ecu') {
+                    const parts = [];
+                    if (d.senderChanged)
+                        parts.push(`${t('sender_lbl')}: <span class="font-bold text-red-600">${escHtml(d.oldSender)}</span> → <span class="font-bold text-green-700">${escHtml(d.newSender)}</span>`);
+                    if (d.receiversChanged)
+                        parts.push(`${t('receivers_lbl')}: <span class="font-bold text-red-600">${escHtml(d.oldReceivers.join(', '))}</span> → <span class="font-bold text-green-700">${escHtml(d.newReceivers.join(', '))}</span>`);
+                    ecuDetails = parts.join('<span class="mx-2 text-amber-400">|</span>');
+                }
+                const rowLabel = d.labelKey ? t(d.labelKey) : (d.labelKeys ? d.labelKeys.map(k => t(k)).join(' & ') : '');
+                row.innerHTML = `
+                    <div class="w-14 bg-amber-100 text-amber-700 flex items-center justify-center border-r border-amber-200 text-[10px] font-mono">${String(d.lineNo).padStart(3,'0')}</div>
+                    <div class="w-16 flex items-center justify-center border-r border-amber-200">
+                        <span class="text-[10px] font-bold font-label text-amber-700 bg-amber-100 px-1 py-0.5 rounded text-center leading-tight">${t('tag_changed')}</span>
+                    </div>
+                    <div class="flex-grow p-3 px-4 font-medium text-amber-900">
+                        <div class="whitespace-pre line-through opacity-60 text-red-600">${escHtml(d.oldLine)}</div>
+                        <div class="whitespace-pre text-green-700">${escHtml(d.newLine)}</div>
+                        <div class="text-[10px] text-amber-600 mt-1">${escHtml(rowLabel)}${ecuDetails ? ': ' + ecuDetails : ''}</div>
+                    </div>`;
+            }
+        } else {
+            row.className = 'flex items-stretch';
+            row.innerHTML = `
+                <div class="w-14 bg-surface-dim text-outline flex items-center justify-center border-r border-outline-variant/10 text-[10px] font-mono">${String(d.lineNo).padStart(3,'0')}</div>
+                <div class="w-16 flex items-center justify-center border-r border-outline-variant/10">
+                    <span class="text-[10px] font-label text-outline px-2">${t('tag_equal')}</span>
+                </div>
+                <div class="flex-grow p-3 px-4 whitespace-pre text-on-surface-variant">${escHtml(d.line)}</div>`;
+        }
+        return row;
+    }
+
+    function parseSignalLine(line) {
+        // Signal: SignalName : bits, init, SenderECU [, ReceiverECUs...] ;
+        const m = line.match(/^(\w+)\s*:\s*\d+\s*,\s*[^,]+?\s*,\s*(\w+)((?:\s*,\s*\w+)*)\s*;/);
+        if (!m) return null;
+        const receivers = m[3] ? m[3].split(',').map(s => s.trim()).filter(Boolean) : [];
+        return { kind: 'signal', name: m[1], sender: m[2], receivers };
+    }
+
+    function parseFrameLine(line) {
+        // Frame: FrameName : frame_id, PublisherNode, frame_size {
+        const m = line.match(/^(\w+)\s*:\s*\d+\s*,\s*(\w+)\s*,\s*\d+\s*\{?/);
+        if (!m) return null;
+        return { kind: 'frame', name: m[1], sender: m[2], receivers: [] };
+    }
+
+    function parseScheduleEntry(line) {
+        // Schedule entry: FrameName delay X ms ;
+        const m = line.match(/^(\w+)\s+delay\s+(\d+(?:\.\d+)?)\s+ms\s*;?/i);
+        if (!m) return null;
+        return { name: m[1], delay: parseFloat(m[2]) };
+    }
+
+    function postProcessDiff(diff) {
+        const usedIndices = new Set();
+        const pairs = new Map(); // index -> changed entry
+
+        // Pass 1: Master / Slaves — proximity-based (always close together in Nodes block)
+        for (let i = 0; i < diff.length; i++) {
+            if (usedIndices.has(i)) continue;
+            const d = diff[i];
+            if (d.type !== 'removed' && d.type !== 'added') continue;
+            const trimmed = d.line.trim();
+            if (!/^Master\s*:/i.test(trimmed) && !/^Slaves\s*:/i.test(trimmed)) continue;
+
+            const searchType = d.type === 'removed' ? 'added' : 'removed';
+            for (let j = i + 1; j < Math.min(diff.length, i + 10); j++) {
+                if (usedIndices.has(j) || diff[j].type !== searchType) continue;
+                const trimmedOther = diff[j].line.trim();
+                const isRemovedFirst = d.type === 'removed';
+                const trimmedOld = isRemovedFirst ? trimmed      : trimmedOther;
+                const trimmedNew = isRemovedFirst ? trimmedOther : trimmed;
+                const oldLine    = isRemovedFirst ? d.line       : diff[j].line;
+                const newLine    = isRemovedFirst ? diff[j].line : d.line;
+                const lineNo     = isRemovedFirst ? d.lineNo     : diff[j].lineNo;
+
+                let entry = null;
+                if (/^Master\s*:/i.test(trimmedOld) && /^Master\s*:/i.test(trimmedNew))
+                    entry = { type: 'changed', reason: 'master_node', labelKey: 'lbl_master', oldLine, newLine, lineNo };
+                else if (/^Slaves\s*:/i.test(trimmedOld) && /^Slaves\s*:/i.test(trimmedNew))
+                    entry = { type: 'changed', reason: 'slaves', labelKey: 'lbl_slaves', oldLine, newLine, lineNo };
+
+                if (entry) {
+                    pairs.set(i, entry); usedIndices.add(i); usedIndices.add(j);
+                    break;
+                }
+            }
+        }
+
+        // Pass 2: Signals + Frames — global pairing by name (can be far apart in diff)
+        const removedEntries = new Map(); // name -> [{ idx, d, parsed }]
+        const addedEntries   = new Map();
+        for (let i = 0; i < diff.length; i++) {
+            if (usedIndices.has(i)) continue;
+            const d = diff[i];
+            if (d.type !== 'removed' && d.type !== 'added') continue;
+            const parsed = parseSignalLine(d.line.trim()) || parseFrameLine(d.line.trim());
+            if (!parsed) continue;
+            const map = d.type === 'removed' ? removedEntries : addedEntries;
+            if (!map.has(parsed.name)) map.set(parsed.name, []);
+            map.get(parsed.name).push({ idx: i, d, parsed });
+        }
+
+        for (const [name, removedList] of removedEntries) {
+            if (!addedEntries.has(name)) continue;
+            const addedList = addedEntries.get(name);
+            const count = Math.min(removedList.length, addedList.length);
+            for (let k = 0; k < count; k++) {
+                const { idx: ri, d: rd, parsed: pOld } = removedList[k];
+                const { idx: ai, d: ad, parsed: pNew } = addedList[k];
+                if (usedIndices.has(ri) || usedIndices.has(ai)) continue;
+                if (pOld.kind !== pNew.kind) continue;
+
+                const senderChanged    = pOld.sender !== pNew.sender;
+                const receiversChanged = pOld.kind === 'signal' &&
+                    [...pOld.receivers].sort().join(',') !== [...pNew.receivers].sort().join(',');
+                if (!senderChanged && !receiversChanged) continue;
+
+                const labelKeys = [];
+                if (senderChanged)    labelKeys.push('lbl_sender_ecu');
+                if (receiversChanged) labelKeys.push('lbl_receiver_ecu');
+
+                const firstIdx = Math.min(ri, ai);
+                pairs.set(firstIdx, {
+                    type: 'changed', reason: 'signal_ecu',
+                    labelKeys,
+                    oldLine: rd.line, newLine: ad.line, lineNo: rd.lineNo,
+                    senderChanged, receiversChanged,
+                    oldSender: pOld.sender,     newSender: pNew.sender,
+                    oldReceivers: pOld.receivers, newReceivers: pNew.receivers
+                });
+                usedIndices.add(ri);
+                usedIndices.add(ai);
+            }
+        }
+
+        // Pass 3: Schedule entries — global pairing by frame name + delay change
+        const removedSched = new Map();
+        const addedSched   = new Map();
+        for (let i = 0; i < diff.length; i++) {
+            if (usedIndices.has(i)) continue;
+            const d = diff[i];
+            if (d.type !== 'removed' && d.type !== 'added') continue;
+            const entry = parseScheduleEntry(d.line.trim());
+            if (!entry) continue;
+            const map = d.type === 'removed' ? removedSched : addedSched;
+            if (!map.has(entry.name)) map.set(entry.name, []);
+            map.get(entry.name).push({ idx: i, d, entry });
+        }
+
+        for (const [name, removedList] of removedSched) {
+            if (!addedSched.has(name)) continue;
+            const addedList = addedSched.get(name);
+            const count = Math.min(removedList.length, addedList.length);
+            for (let k = 0; k < count; k++) {
+                const { idx: ri, d: rd, entry: eOld } = removedList[k];
+                const { idx: ai, d: ad, entry: eNew } = addedList[k];
+                if (usedIndices.has(ri) || usedIndices.has(ai)) continue;
+                if (eOld.delay === eNew.delay) continue;
+
+                const delta = eNew.delay - eOld.delay;
+                const firstIdx = Math.min(ri, ai);
+                pairs.set(firstIdx, {
+                    type: 'changed', reason: 'schedule_delay',
+                    labelKey: 'lbl_delay',
+                    oldDelay: eOld.delay, newDelay: eNew.delay, delta,
+                    oldLine: rd.line, newLine: ad.line, lineNo: rd.lineNo
+                });
+                usedIndices.add(ri);
+                usedIndices.add(ai);
+            }
+        }
+
+        const processed = [];
+        for (let i = 0; i < diff.length; i++) {
+            if (pairs.has(i))             processed.push(pairs.get(i));
+            else if (!usedIndices.has(i)) processed.push(diff[i]);
+        }
+        return processed;
+    }
+
+    // LCS-based line diff
+    function diffLines(oldText, newText) {
+        const a = oldText.split('\n');
+        const b = newText.split('\n');
+
+        const m = a.length, n = b.length;
+        const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+        for (let i = m - 1; i >= 0; i--)
+            for (let j = n - 1; j >= 0; j--)
+                dp[i][j] = a[i] === b[j] ? dp[i+1][j+1] + 1 : Math.max(dp[i+1][j], dp[i][j+1]);
+
+        const result = [];
+        let i = 0, j = 0;
+        while (i < m || j < n) {
+            if (i < m && j < n && a[i] === b[j]) {
+                result.push({ type: 'equal', line: a[i], lineNo: i + 1 });
+                i++; j++;
+            } else if (j < n && (i >= m || dp[i][j+1] >= dp[i+1][j])) {
+                result.push({ type: 'added', line: b[j], lineNo: j + 1 });
+                j++;
+            } else {
+                result.push({ type: 'removed', line: a[i], lineNo: i + 1 });
+                i++;
+            }
+        }
+
+        // İçeriği aynı olan silindi/eklendi çiftlerini eşle ve gizle
+        // (satır yeri değişmiş ama içerik aynı kalmış satırlar)
+        const removedMap = new Map(); // content -> [index, ...]
+        const addedMap   = new Map();
+        result.forEach((d, idx) => {
+            if (d.type === 'removed') {
+                if (!removedMap.has(d.line)) removedMap.set(d.line, []);
+                removedMap.get(d.line).push(idx);
+            } else if (d.type === 'added') {
+                if (!addedMap.has(d.line)) addedMap.set(d.line, []);
+                addedMap.get(d.line).push(idx);
+            }
+        });
+
+        const suppress = new Set();
+        for (const [content, rIdxs] of removedMap) {
+            if (!addedMap.has(content)) continue;
+            const aIdxs = addedMap.get(content);
+            const pairs = Math.min(rIdxs.length, aIdxs.length);
+            for (let k = 0; k < pairs; k++) {
+                suppress.add(rIdxs[k]);
+                suppress.add(aIdxs[k]);
+            }
+        }
+
+        return result.filter((_, idx) => !suppress.has(idx));
+    }
+
+    function compareFiles() {
+        if (!state.old || !state.new) {
+            alert(currentLang === 'en' ? 'Please load both files.' : 'Lütfen her iki dosyayı da yükleyin.');
+            return;
+        }
+
+        const diff = postProcessDiff(diffLines(state.old, state.new));
+        const added   = diff.filter(d => d.type === 'added').length;
+        const removed = diff.filter(d => d.type === 'removed').length;
+        const changed = diff.filter(d => d.type === 'changed').length;
+
+        const section = document.getElementById('results-section');
+        section.classList.remove('hidden');
+
+        if (added === 0 && removed === 0 && changed === 0) {
+            document.getElementById('results-summary').textContent = t('no_diff_summary');
+            document.getElementById('results-badges').innerHTML = '';
+            document.getElementById('no-diff-banner').classList.remove('hidden');
+            document.getElementById('diff-table').classList.add('hidden');
+            return;
+        }
+
+        document.getElementById('no-diff-banner').classList.add('hidden');
+        document.getElementById('diff-table').classList.remove('hidden');
+
+        const totalChanges = added + removed + changed;
+        document.getElementById('results-summary').textContent =
+            t('changes_detected')(totalChanges);
+
+        let badges = '';
+        if (removed) badges += `
+            <div class="flex items-center gap-2 px-3 py-1 bg-error-container rounded-md">
+                <div class="w-2 h-2 rounded-full bg-error"></div>
+                <span class="text-[10px] font-bold font-label uppercase">${removed} ${t('badge_removed')}</span>
+            </div>`;
+        if (added) badges += `
+            <div class="flex items-center gap-2 px-3 py-1 bg-primary-fixed rounded-md">
+                <div class="w-2 h-2 rounded-full bg-primary"></div>
+                <span class="text-[10px] font-bold font-label uppercase">${added} ${t('badge_added')}</span>
+            </div>`;
+        if (changed) badges += `
+            <div class="flex items-center gap-2 px-3 py-1 bg-amber-100 rounded-md">
+                <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                <span class="text-[10px] font-bold font-label uppercase text-amber-800">${changed} ${t('badge_changed')}</span>
+            </div>`;
+        document.getElementById('results-badges').innerHTML = badges;
+
+        const rowsEl = document.getElementById('diff-rows');
+        rowsEl.innerHTML = '';
+
+        // Assign LDF block names and compute show set
+        const diffBlocked = assignBlocks(diff);
+        const CONTEXT = 0;
+        const show = new Set();
+        diffBlocked.forEach((d, idx) => {
+            if (d.type !== 'equal') {
+                for (let k = Math.max(0, idx - CONTEXT); k <= Math.min(diffBlocked.length - 1, idx + CONTEXT); k++)
+                    show.add(k);
+            }
+        });
+
+        // Group shown entries by block (preserve order of first appearance)
+        const blockMap   = new Map();
+        const blockOrder = [];
+        const blockPrev  = new Map();
+        diffBlocked.forEach((d, idx) => {
+            if (!show.has(idx)) return;
+            // If the sub-block name is itself a known LDF top-level section,
+            // promote it to its own accordion instead of nesting under the current block.
+            const promoted = d.subBlock && LDF_TOP_SECTIONS.has(d.subBlock);
+            const blk = promoted ? d.subBlock : d.block;
+            const entry = promoted ? { d: { ...d, subBlock: null } } : { d };
+            if (!blockMap.has(blk)) { blockMap.set(blk, []); blockOrder.push(blk); }
+            blockMap.get(blk).push(entry);
+            blockPrev.set(blk, idx);
+        });
+
+        // Render each block as a collapsible accordion section
+        blockOrder.forEach(blkName => {
+            const entries     = blockMap.get(blkName);
+            if (!entries.length) return;
+            const changeCount = entries.filter(e => e.d.type !== 'equal').length;
+            const blkId = 'blk_' + blkName.replace(/\W/g, '_') + '_' + Math.random().toString(36).slice(2, 7);
+
+            const sectionEl = document.createElement('div');
+            sectionEl.className = 'border-b border-outline-variant/20 last:border-b-0';
+
+            // Header
+            const hdr = document.createElement('div');
+            hdr.className = 'flex items-center gap-3 px-5 py-3 bg-surface-container-high cursor-pointer hover:bg-surface-container transition-colors select-none group';
+            const badge = changeCount > 0
+                ? `<span class="text-[10px] font-bold font-label px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">${changeCount} ${t('n_changes')}</span>`
+                : `<span class="text-[10px] font-label text-outline italic">${t('no_changes')}</span>`;
+            hdr.innerHTML = `
+                <span class="material-symbols-outlined text-base text-on-surface-variant transition-transform duration-200" id="ico_${blkId}">expand_less</span>
+                <span class="font-bold font-label text-sm text-on-surface">${escHtml(blkName)}</span>
+                ${badge}
+                <span class="ml-auto text-[10px] font-label text-outline group-hover:text-on-surface-variant">${entries.length} ${t('n_lines')}</span>
+            `;
+            hdr.addEventListener('click', () => {
+                const body = document.getElementById(blkId);
+                const ico  = document.getElementById('ico_' + blkId);
+                const open = body.style.display !== 'none';
+                body.style.display = open ? 'none' : '';
+                ico.style.transform = open ? 'rotate(-90deg)' : 'rotate(0deg)';
+            });
+
+            // Body
+            const bodyEl = document.createElement('div');
+            bodyEl.id = blkId;
+            bodyEl.className = 'font-mono text-xs divide-y divide-surface-container';
+            let lastSubBlock = undefined;
+            let currentSubBody = null;
+            entries.forEach(({ d }) => {
+                // Collapsible sub-block header (frame / schedule name) — new color, toggleable
+                if (d.subBlock && d.subBlock !== lastSubBlock) {
+                    lastSubBlock = d.subBlock;
+                    const subId = 'sub_' + d.subBlock.replace(/\W/g, '_') + '_' + Math.random().toString(36).slice(2, 6);
+
+                    const subHdr = document.createElement('div');
+                    subHdr.className = 'flex items-center gap-2 pl-4 pr-5 py-2 bg-slate-400 border-y border-slate-500 border-l-4 border-l-indigo-500 cursor-pointer hover:bg-slate-500 transition-colors select-none';
+                    subHdr.innerHTML = `
+                        <span class="material-symbols-outlined text-sm text-slate-200 transition-transform duration-200" id="subico_${subId}">expand_less</span>
+                        <span class="material-symbols-outlined text-sm text-indigo-200">view_in_ar</span>
+                        <span class="text-[11px] font-bold font-label text-white tracking-wide">${escHtml(d.subBlock)}</span>
+                    `;
+                    subHdr.addEventListener('click', () => {
+                        const body = document.getElementById(subId);
+                        const ico  = document.getElementById('subico_' + subId);
+                        const open = body.style.display !== 'none';
+                        body.style.display = open ? 'none' : '';
+                        ico.style.transform = open ? 'rotate(-90deg)' : '';
+                    });
+
+                    currentSubBody = document.createElement('div');
+                    currentSubBody.id = subId;
+                    currentSubBody.className = 'divide-y divide-surface-container';
+
+                    bodyEl.appendChild(subHdr);
+                    bodyEl.appendChild(currentSubBody);
+                }
+
+                const target = (d.subBlock && currentSubBody) ? currentSubBody : bodyEl;
+                target.appendChild(buildRow(d));
+            });
+
+            sectionEl.appendChild(hdr);
+            sectionEl.appendChild(bodyEl);
+            rowsEl.appendChild(sectionEl);
+        });
+
+        buildFilterBar(diff);
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    const filterState = { delay: true, sender: true, receiver: true, removed: true, added: true };
+
+    const CHIP_CONFIG = {
+        delay:    { labelKey: 'chip_delay',    icon: 'timer',         on: 'bg-teal-100 border border-teal-300 text-teal-800',                       off: 'bg-surface-container border border-outline-variant/30 text-outline opacity-50' },
+        sender:   { labelKey: 'chip_sender',   icon: 'swap_horiz',    on: 'bg-amber-100 border border-amber-300 text-amber-800',                    off: 'bg-surface-container border border-outline-variant/30 text-outline opacity-50' },
+        receiver: { labelKey: 'chip_receiver', icon: 'group',         on: 'bg-violet-100 border border-violet-300 text-violet-800',                 off: 'bg-surface-container border border-outline-variant/30 text-outline opacity-50' },
+        removed:  { labelKey: 'chip_removed',  icon: 'remove_circle', on: 'bg-error-container border border-red-300 text-on-error-container',        off: 'bg-surface-container border border-outline-variant/30 text-outline opacity-50' },
+        added:    { labelKey: 'chip_added',    icon: 'add_circle',    on: 'bg-primary-fixed border border-blue-300 text-on-primary-fixed-variant',  off: 'bg-surface-container border border-outline-variant/30 text-outline opacity-50' },
+    };
+
+    function buildFilterBar(diff) {
+        const counts = { delay: 0, sender: 0, receiver: 0, removed: 0, added: 0 };
+        diff.forEach(d => {
+            if (d.type === 'changed' && d.reason === 'schedule_delay') counts.delay++;
+            if (d.type === 'changed' && d.reason === 'signal_ecu') {
+                if (d.senderChanged)    counts.sender++;
+                if (d.receiversChanged) counts.receiver++;
+            }
+            if (d.type === 'removed') counts.removed++;
+            if (d.type === 'added')   counts.added++;
+        });
+
+        const hasAny = Object.values(counts).some(v => v > 0);
+        const bar = document.getElementById('filter-bar');
+        if (!hasAny) { bar.classList.add('hidden'); return; }
+        bar.classList.remove('hidden');
+
+        // Reset state
+        Object.keys(filterState).forEach(k => filterState[k] = true);
+
+        document.getElementById('filter-chips').innerHTML = Object.entries(CHIP_CONFIG).map(([key, cfg]) => {
+            if (counts[key] === 0) return '';
+            return `<button id="chip-${key}" onclick="toggleFilter('${key}')"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-lg font-label text-[11px] font-bold transition-all ${cfg.on}">
+                <span class="material-symbols-outlined text-sm">${cfg.icon}</span>
+                ${t(cfg.labelKey)}
+                <span class="ml-1 text-[10px] font-mono opacity-70">${counts[key]}</span>
+            </button>`;
+        }).join('');
+    }
+
+    function toggleFilter(key) {
+        filterState[key] = !filterState[key];
+        const cfg = CHIP_CONFIG[key];
+        const chip = document.getElementById('chip-' + key);
+        chip.className = chip.className.replace(filterState[key] ? cfg.off : cfg.on, filterState[key] ? cfg.on : cfg.off);
+        applyFilters();
+    }
+
+    function applyFilters() {
+        document.querySelectorAll('#diff-rows [data-filter-type]').forEach(row => {
+            const tags = row.dataset.filterType.split(' ');
+            const visible = tags.some(t => filterState[t] === true);
+            row.style.display = visible ? '' : 'none';
+        });
+    }
+
+    function escHtml(str) {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+</script>
+</body></html>
