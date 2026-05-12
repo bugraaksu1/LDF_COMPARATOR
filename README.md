@@ -1,67 +1,67 @@
 # LDF Comparator
 
-İki LDF (LIN Description File) dosyasını karşılaştırarak aralarındaki farkları görsel olarak gösteren, tarayıcı tabanlı bir araç.
+A browser-based tool that compares two LDF (LIN Description File) files and visually highlights the differences between them.
 
-## Nasıl Kullanılır?
+## How to Use
 
-1. `LDF_COMPARATOR.html` dosyasını tarayıcıda aç.
-2. Sol tarafa **eski** LDF dosyasını, sağ tarafa **yeni** LDF dosyasını sürükle-bırak ya da seç.
-3. **Karşılaştır** butonuna tıkla.
-4. Farklar bölüm bölüm listelenir.
+1. Open `LDF_COMPARATOR.html` in your browser.
+2. Drag and drop (or select) the **old** LDF file on the left, and the **new** LDF file on the right.
+3. Click the **Compare** button.
+4. Differences are listed section by section.
 
-Kurulum gerekmez, internet bağlantısına gerek yoktur (CDN bağımlılıkları ilk açılışta yüklenir).
+No installation required, and no internet connection is needed (CDN dependencies load on first launch).
 
 ---
 
-## Ne Gösterir?
+## What It Shows
 
-| Renk / Etiket | Anlam |
+| Color / Label | Meaning |
 |---|---|
-| Kırmızı — **Silindi** | Eski dosyada vardı, yenisinde yok |
-| Yeşil — **Eklendi** | Yeni dosyada var, eskisinde yok |
-| Sarı — **Değişti** | Satır var ama içeriği değişmiş |
+| Red — **Deleted** | Existed in the old file, not in the new one |
+| Green — **Added** | Exists in the new file, not in the old one |
+| Yellow — **Changed** | Line exists in both, but its content has changed |
 
-### Akıllı Karşılaştırma
+### Smart Comparison
 
-Araç, LDF formatını anlayarak bazı değişiklikleri daha anlamlı şekilde gösterir:
+The tool understands the LDF format and presents certain changes in a more meaningful way:
 
-- **Master / Slaves:** Düğüm adı değişmişse "silindi + eklendi" yerine "değişti" olarak işaretler.
-- **Sinyal gönderici ECU:** Hangi ECU'nun gönderdiği değişmişse "göndericisi değişti" olarak gösterir.
-- **Sinyal alıcı ECU:** Alıcı listesi değişmişse "alıcısı değişti" olarak gösterir.
-- **Frame yayıncısı:** Frame'i yayınlayan ECU değişmişse ayrıca belirtir.
-- **Schedule delay:** Gecikme süresi değişmişse farkı `+X ms` / `−X ms` şeklinde gösterir.
+- **Master / Slaves:** If a node name has changed, it is marked as "changed" instead of "deleted + added".
+- **Signal publisher ECU:** If the publishing ECU has changed, it is shown as "publisher changed".
+- **Signal subscriber ECU:** If the subscriber list has changed, it is shown as "subscribers changed".
+- **Frame publisher:** If the ECU publishing a frame has changed, it is highlighted separately.
+- **Schedule delay:** If the delay duration has changed, the difference is shown as `+X ms` / `−X ms`.
 
 ---
 
-## Bölümler ve Filtreler
+## Sections and Filters
 
-Karşılaştırma sonuçları LDF bloklarına göre ayrı **sekmeler** halinde gruplandırılır:
-`Nodes`, `Signals`, `Frames`, `Schedule_tables`, `Signal_encoding_types`, `Node_attributes` vb.
+Comparison results are grouped into separate **tabs** based on LDF blocks:
+`Nodes`, `Signals`, `Frames`, `Schedule_tables`, `Signal_encoding_types`, `Node_attributes`, etc.
 
-Her sekmenin başlığına tıklayarak o bölümü açıp kapatabilirsin.  
-`Frames` bölümü içinde her frame kendi alt başlığında gösterilir; alt başlığa tıklayarak o frame'in değişikliklerini de gizleyebilirsin.
+You can click on the header of each tab to expand or collapse that section.
+Inside the `Frames` section, each frame is displayed under its own sub-header; clicking the sub-header hides that frame's changes as well.
 
-Sayfanın üstündeki **filtre çipleri** ile şu kategorileri gösterip gizleyebilirsin:
+The **filter chips** at the top of the page let you show or hide the following categories:
 
-| Filtre | Açıklama |
+| Filter | Description |
 |---|---|
-| Delay | Schedule delay değişiklikleri |
-| Gönderici | Sinyal / frame gönderici ECU değişiklikleri |
-| Alıcı | Sinyal alıcı ECU değişiklikleri |
-| Silindi | Tamamen silinen satırlar |
-| Eklendi | Tamamen eklenen satırlar |
+| Delay | Schedule delay changes |
+| Publisher | Signal / frame publishing ECU changes |
+| Subscriber | Signal subscribing ECU changes |
+| Deleted | Lines that were completely removed |
+| Added | Lines that were completely added |
 
 ---
 
-## Dil Seçeneği
+## Language Option
 
-Sağ üst köşedeki **TR / EN** butonuyla arayüz dilini Türkçe ve İngilizce arasında geçirebilirsin.
+Using the **TR / EN** button in the top-right corner, you can switch the interface language between Turkish and English.
 
 ---
 
-## Teknik Notlar
+## Technical Notes
 
-- Tek dosya uygulaması: `LDF_COMPARATOR.html`
-- Harici kütüphane gerektirmez; Tailwind CSS ve Material Symbols CDN üzerinden yüklenir.
-- Diff algoritması LCS (En Uzun Ortak Alt Dizi) tabanlıdır.
-- Saf JavaScript, framework kullanılmamıştır.
+- Single-file application: `LDF_COMPARATOR.html`
+- No external libraries required; Tailwind CSS and Material Symbols are loaded via CDN.
+- The diff algorithm is based on LCS (Longest Common Subsequence).
+- Pure JavaScript — no framework is used.
